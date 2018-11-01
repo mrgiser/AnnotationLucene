@@ -61,7 +61,6 @@ final class DefaultIndexingChain extends DocConsumer {
   // NOTE: I tried using Hash Map<String,PerField>
   // but it was ~2% slower on Wiki and Geonames with Java
   // 1.7.0_25:
-  //每一个 fields
   private PerField[] fieldHash = new PerField[2];
   private int hashMask = 1;
 
@@ -436,7 +435,6 @@ final class DefaultIndexingChain extends DocConsumer {
     }
 
     // Invert indexed fields:
-    //     反转fields
     if (fieldType.indexOptions() != IndexOptions.NONE) {
       
       // if the field omits norms, the boost cannot be indexed.
@@ -445,10 +443,7 @@ final class DefaultIndexingChain extends DocConsumer {
       }
       
       fp = getOrAddField(fieldName, fieldType, true);
-
-//      first is true if this is the first time we are seeing this field name in this document.
       boolean first = fp.fieldGen != fieldGen;
-
       fp.invert(field, first);
 
       if (first) {
@@ -460,7 +455,6 @@ final class DefaultIndexingChain extends DocConsumer {
     }
 
     // Add stored fields:
-    //并且如果是存储域的话，用 StoredFieldsWriterPerThread 将其写到索引中
     if (fieldType.stored()) {
       if (fp == null) {
         fp = getOrAddField(fieldName, fieldType, false);
@@ -606,17 +600,11 @@ final class DefaultIndexingChain extends DocConsumer {
   /** Returns a previously created {@link PerField},
    *  absorbing the type information from {@link FieldType},
    *  and creates a new {@link PerField} if this field name
-   *  wasn't seen yet.
-   *
-   *  fieldHash中保存了所有的PerField
-   *  返回对应的PerField，不存在则创建
-   *  */
+   *  wasn't seen yet. */
   private PerField getOrAddField(String name, IndexableFieldType fieldType, boolean invert) {
 
     // Make sure we have a PerField allocated
-    //计算哈希值
     final int hashPos = name.hashCode() & hashMask;
-    //找到哈希表中对应的位置
     PerField fp = fieldHash[hashPos];
     while (fp != null && !fp.fieldInfo.name.equals(name)) {
       fp = fp.next;
@@ -749,7 +737,6 @@ final class DefaultIndexingChain extends DocConsumer {
        * but rather a finally that takes note of the problem.
        */
       boolean succeededInProcessingField = false;
-      //分析该field
       try (TokenStream stream = tokenStream = field.tokenStream(docState.analyzer, tokenStream)) {
         // reset the TokenStream to the first token
         stream.reset();
@@ -806,8 +793,6 @@ final class DefaultIndexingChain extends DocConsumer {
           // corrupt and should not be flushed to a
           // new segment:
           try {
-            // 该方法负责进行将上面分解出的 token 字符串添加到 PostingList 表中，添加位置等信息的处理会调用接下
-            //来的 consumer 的方法
             termsHashPerField.add();
           } catch (MaxBytesLengthExceededException e) {
             byte[] prefix = new byte[30];

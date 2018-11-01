@@ -229,7 +229,6 @@ class DocumentsWriterPerThread {
     boolean success = false;
     try {
       try {
-//        对文档以及域进行处理
         consumer.processDocument();
       } finally {
         docState.clear();
@@ -407,7 +406,6 @@ class DocumentsWriterPerThread {
   }
 
   /** Flush all pending docs to a new segment */
-  //DWPT中flush操作
   FlushedSegment flush() throws IOException, AbortingException {
     assert numDocsInRAM > 0;
     assert deleteSlice.isEmpty() : "all deletes must be applied in prepareFlush";

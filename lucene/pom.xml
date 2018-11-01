@@ -81,8 +81,8 @@
                 <bundledSignature>jdk-reflection</bundledSignature>
               </bundledSignatures>
               <signaturesFiles>
-                <signaturesFile>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1/lucene/tools/forbiddenApis/base.txt</signaturesFile>
-                <signaturesFile>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1/lucene/tools/forbiddenApis/lucene.txt</signaturesFile>
+                <signaturesFile>G:/git/Lucene/git/AnnotationLucene/lucene/tools/forbiddenApis/base.txt</signaturesFile>
+                <signaturesFile>G:/git/Lucene/git/AnnotationLucene/lucene/tools/forbiddenApis/lucene.txt</signaturesFile>
               </signaturesFiles>
             </configuration>
             <goals>
@@ -111,9 +111,9 @@
                 <bundledSignature>jdk-reflection</bundledSignature>
               </bundledSignatures>
               <signaturesFiles>
-                <signaturesFile>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1/lucene/tools/forbiddenApis/tests.txt</signaturesFile>
-                <signaturesFile>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1/lucene/tools/forbiddenApis/base.txt</signaturesFile>
-                <signaturesFile>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1/lucene/tools/forbiddenApis/lucene.txt</signaturesFile>
+                <signaturesFile>G:/git/Lucene/git/AnnotationLucene/lucene/tools/forbiddenApis/tests.txt</signaturesFile>
+                <signaturesFile>G:/git/Lucene/git/AnnotationLucene/lucene/tools/forbiddenApis/base.txt</signaturesFile>
+                <signaturesFile>G:/git/Lucene/git/AnnotationLucene/lucene/tools/forbiddenApis/lucene.txt</signaturesFile>
               </signaturesFiles>
             </configuration>
             <goals>

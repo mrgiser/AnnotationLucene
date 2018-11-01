@@ -462,7 +462,6 @@ final class DocumentsWriter implements Closeable, Accountable {
 
     boolean hasEvents = preUpdate();
 
-//    得 到 当 前 线 程 对 应 的 文 档 集 处 理 对 象
     final ThreadState perThread = flushControl.obtainAndLock();
 
     final DocumentsWriterPerThread flushingDWPT;
@@ -473,7 +472,6 @@ final class DocumentsWriter implements Closeable, Accountable {
       ensureOpen();
       ensureInitialized(perThread);
       assert perThread.isInitialized();
-      //    得 到 当 前 线 程 对 应 的 文 档 集 处 理 对 象
       final DocumentsWriterPerThread dwpt = perThread.dwpt;
       final int dwptNumDocs = dwpt.getNumDocsInRAM();
       try {
@@ -505,7 +503,6 @@ final class DocumentsWriter implements Closeable, Accountable {
     return seqNo;
   }
 
-  //DocumentsWriterPerThread执行flush操作
   private boolean doFlush(DocumentsWriterPerThread flushingDWPT) throws IOException, AbortingException {
     boolean hasEvents = false;
     while (flushingDWPT != null) {
@@ -627,7 +624,6 @@ final class DocumentsWriter implements Closeable, Accountable {
    * two stage operation; the caller must ensure (in try/finally) that finishFlush
    * is called after this method, to release the flush lock in DWFlushControl
    */
-  // 所有的DWPT进行flush操作
   long flushAllThreads()
     throws IOException, AbortingException {
     final DocumentsWriterDeleteQueue flushingDeleteQueue;
@@ -654,7 +650,6 @@ final class DocumentsWriter implements Closeable, Accountable {
       DocumentsWriterPerThread flushingDWPT;
       // Help out with flushing:
       while ((flushingDWPT = flushControl.nextPendingFlush()) != null) {
-        //逐个线程flush操作
         anythingFlushed |= doFlush(flushingDWPT);
       }
       // If a concurrent flush is still in flight wait for it

@@ -51,7 +51,6 @@ final class DocumentsWriterPerThreadPool {
    */
   @SuppressWarnings("serial")
   final static class ThreadState extends ReentrantLock {
-    //文档以及域的处理对象
     DocumentsWriterPerThread dwpt;
     // TODO this should really be part of DocumentsWriterFlushControl
     // write access guarded by DocumentsWriterFlushControl

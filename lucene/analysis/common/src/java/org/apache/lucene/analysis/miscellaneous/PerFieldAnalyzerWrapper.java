@@ -49,9 +49,7 @@ import java.util.Map;
  * and query parsing.
  */
 public final class PerFieldAnalyzerWrapper extends DelegatingAnalyzerWrapper {
-//  即当域没有指定分词器的时候使用此分词器
   private final Analyzer defaultAnalyzer;
-//  一个从域名到分词器的映射，将根据域名使用相应的分词器
   private final Map<String, Analyzer> fieldAnalyzers;
 
   /**

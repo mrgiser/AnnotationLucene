@@ -37,10 +37,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
   TermToBytesRefAttribute termAtt;
 
   // Copied from our perThread
-  //此方法涉及到访问
-  //和管理三个内存中的数据池，即 termBytePool、 intPool 和 bytePool。 这三个池均采用分片（slice
-  //或 block）来管理，每一片有固定的长度，定义在 DocumentsWriter 中，并且也由 DocumentsWriter 来分配新的
-  //块或者回收不用的块，以达到节省内存和提高效率的作用。
   final IntBlockPool intPool;
   final ByteBlockPool bytePool;
   final ByteBlockPool termBytePool;
@@ -52,7 +48,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
 
   final BytesRefHash bytesHash;
 
-  //TermsHashPerField 会维护一个 postingsArray 的散列表，用来存储和管理每一个添加的 token 及其位置信息
   ParallelPostingsArray postingsArray;
   private final Counter bytesUsed;
 
@@ -107,8 +102,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
   // because token text has already been "interned" into
   // textStart, so we hash by textStart.  term vectors use
   // this API.
-  //该方法负责进行将上面分解出的 token 字符串添加到 PostingList 表中，添加位置等信息的处理会调用接下
-  //来的 consumer 的方法，如 FreqProxTermsWriterPerField 或 TermVectorsTermsWriterPerField
   public void add(int textStart) throws IOException {
     int termID = bytesHash.addByPoolOffset(textStart);
     if (termID >= 0) {      // New posting
@@ -149,8 +142,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
   /** Called once per inverted token.  This is the primary
    *  entry point (for first TermsHash); postings use this
    *  API. */
-  //该方法负责进行将上面分解出的 token 字符串添加到 PostingList 表中，添加位置等信息的处理会调用接下
-  //来的 consumer 的方法，如 FreqProxTermsWriterPerField 或 TermVectorsTermsWriterPerField
   void add() throws IOException {
     // We are first in the chain so we must "intern" the
     // term text into textStart address
@@ -182,7 +173,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
       }
       postingsArray.byteStarts[termID] = intUptos[intUptoStart];
 
-      //Called when a term is seen for the first time.
       newTerm(termID);
 
     } else {
@@ -190,7 +180,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
       int intStart = postingsArray.intStarts[termID];
       intUptos = intPool.buffers[intStart >> IntBlockPool.INT_BLOCK_SHIFT];
       intUptoStart = intStart & IntBlockPool.INT_BLOCK_MASK;
-
       addTerm(termID);
     }
 
@@ -304,14 +293,6 @@ abstract class TermsHashPerField implements Comparable<TermsHashPerField> {
 
     return true;
   }
-
-  //  FreqProxTermsWriterPerField 该方法负责将 term 在文档中出现的位置（position）和频率（frequency），以及 term 自带的 payloads 以及
-  //  term 所在的文档编号等信息写入内存中的缓冲区，即 TermsHashPerThread 中的 ByteBlockPool 对象。
-
-  //  TermVectorsTermsWriterPerField 该方法负责将 term 在文档中出现的位置（position）和偏移（offset）向量（startOffset, endOffset） 等信息
-  //  写 入 内 存 中 的 缓 冲 区 ， 即 TermsHashPerThread 中 的 ByteBlockPool 对 象 。 需 要 注 意 的 是 只 有 当
-  //field.isStorePositionWithTermVector() 或 field.isStoreOffsetWithTermVector() 为 true 时 ， 相 应 的 信 息
-  //          (startOffset,endOffset)或 position 才会写入
 
   /** Called when a term is seen for the first time. */
   abstract void newTerm(int termID) throws IOException;

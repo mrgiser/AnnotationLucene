@@ -27,8 +27,7 @@
     <relativePath/>
   </parent>
   <groupId>org.apache.lucene</groupId>
-  <!--<artifactId>lucene-solr-grandparent</artifactId>-->
-  <artifactId>lucene-grandparent</artifactId>
+  <artifactId>lucene-solr-grandparent</artifactId>
   <version>6.6.1</version>
   <packaging>pom</packaging>
   <name>Grandparent POM for Apache Lucene Core and Apache Solr</name>
@@ -9686,7 +9685,7 @@
           <getRevisionOnlyOnce>true</getRevisionOnlyOnce>
           <revisionOnScmFailure>NO-REVISION-AVAILABLE</revisionOnScmFailure>
           <buildNumberPropertyName>checkoutid</buildNumberPropertyName>
-          <scmDirectory>G:/git/Lucene/maven/lucene-solr-releases-lucene-solr-6.6.1</scmDirectory>
+          <scmDirectory>G:/git/Lucene/git/AnnotationLucene</scmDirectory>
         </configuration>
       </plugin>
       <plugin>
