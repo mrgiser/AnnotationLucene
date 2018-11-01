@@ -35,7 +35,7 @@
   <url>http://lucene.apache.org</url>
   <modules>
     <module>lucene</module>
-    <module>solr</module>
+    <!--<module>solr</module>-->
   </modules>
   <properties>
     <vc-anonymous-base-url>http://git-wip-us.apache.org/repos/asf/lucene-solr.git</vc-anonymous-base-url>

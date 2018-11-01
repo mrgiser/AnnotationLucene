@@ -2450,3 +2450,6 @@
 /lucene/build/tools/classes/java/org/apache/lucene/validation/LibVersionsCheckTask.class
 /lucene/build/tools/classes/java/org/apache/lucene/validation/LicenseCheckTask.class
 /lucene/build/tools/classes/java/org/apache/lucene/validation/LicenseType.class
+/.idea
+/file_index
+/lucene/file_index
