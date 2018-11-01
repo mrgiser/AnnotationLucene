@@ -27,7 +27,8 @@
     <relativePath/>
   </parent>
   <groupId>org.apache.lucene</groupId>
-  <artifactId>lucene-solr-grandparent</artifactId>
+  <!--<artifactId>lucene-solr-grandparent</artifactId>-->
+  <artifactId>lucene-grandparent</artifactId>
   <version>6.6.1</version>
   <packaging>pom</packaging>
   <name>Grandparent POM for Apache Lucene Core and Apache Solr</name>
