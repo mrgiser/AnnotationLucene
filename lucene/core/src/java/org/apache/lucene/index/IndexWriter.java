@@ -1125,6 +1125,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable {
         }
         flush(true, true);
         waitForMerges();
+        //提交
         commitInternal(config.getMergePolicy());
         rollbackInternal(); // ie close, since we just committed
         success = true;
@@ -2813,6 +2814,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable {
       SegmentInfo info = new SegmentInfo(directoryOrig, Version.LATEST, mergedName, -1,
                                          false, codec, Collections.emptyMap(), StringHelper.randomId(), new HashMap<>(), config.getIndexSort());
 
+//      SegmentMerger 类负责合并多个 segment。
       SegmentMerger merger = new SegmentMerger(Arrays.asList(readers), info, infoStream, trackingDir,
                                                globalFieldNumberMap, 
                                                context);
@@ -3384,6 +3386,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable {
       throw new IllegalStateException("this writer hit an unrecoverable error; cannot flush", tragedy);
     }
 
+    //doBeforeFlush、doAfterFlush留给扩展类使用的钩子
     doBeforeFlush();
     testPoint("startDoFlush");
     boolean success = false;
@@ -3394,7 +3397,8 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable {
         infoStream.message("IW", "  index before flush " + segString());
       }
       boolean anyChanges = false;
-      
+
+      //同步锁
       synchronized (fullFlushLock) {
         boolean flushSuccess = false;
         try {
@@ -4704,6 +4708,7 @@ public class IndexWriter implements Closeable, TwoPhaseCommit, Accountable {
           // Exception here means nothing is prepared
           // (this method unwinds everything it did on
           // an exception)
+          //索引文件commit写入到磁盘
           toSync.prepareCommit(directory);
           if (infoStream.isEnabled("IW")) {
             infoStream.message("IW", "startCommit: wrote pending segments file \"" + IndexFileNames.fileNameFromGeneration(IndexFileNames.PENDING_SEGMENTS, "", toSync.getGeneration()) + "\"");

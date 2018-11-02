@@ -221,6 +221,10 @@ final class TermVectorsConsumerPerField extends TermsHashPerField {
   }
 
   @Override
+    // 该方法负责将 term 在文档中出现的位置（position）和偏移（offset）向量（startOffset, endOffset） 等信息
+    // 写 入 内 存 中 的 缓 冲 区 ， 即 TermsHashPerThread 中 的 ByteBlockPool 对 象 。 需 要 注 意 的 是 只 有 当
+    //field.isStorePositionWithTermVector() 或 field.isStoreOffsetWithTermVector() 为 true 时 ， 相 应 的 信 息
+    // (startOffset,endOffset)或 position 才会写入。
   void newTerm(final int termID) {
     TermVectorsPostingsArray postings = termVectorsPostingsArray;
 
@@ -232,6 +236,10 @@ final class TermVectorsConsumerPerField extends TermsHashPerField {
   }
 
   @Override
+  // 该方法负责将 term 在文档中出现的位置（position）和偏移（offset）向量（startOffset, endOffset） 等信息
+  // 写 入 内 存 中 的 缓 冲 区 ， 即 TermsHashPerThread 中 的 ByteBlockPool 对 象 。 需 要 注 意 的 是 只 有 当
+  //field.isStorePositionWithTermVector() 或 field.isStoreOffsetWithTermVector() 为 true 时 ， 相 应 的 信 息
+  // (startOffset,endOffset)或 position 才会写入。
   void addTerm(final int termID) {
     TermVectorsPostingsArray postings = termVectorsPostingsArray;
 

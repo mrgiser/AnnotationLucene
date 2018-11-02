@@ -487,6 +487,7 @@ public final class SegmentInfos implements Cloneable, Iterable<SegmentCommitInfo
     }
   }
 
+  //将段信息写入到Directory中
   /** Write ourselves to the provided {@link IndexOutput} */
   public void write(Directory directory, IndexOutput out) throws IOException {
     CodecUtil.writeIndexHeader(out, "segments", VERSION_CURRENT, 

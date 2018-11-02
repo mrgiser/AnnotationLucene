@@ -129,10 +129,13 @@ public abstract class AnalyzerWrapper extends Analyzer {
     return reader;
   }
 
+//  使用getWrappedAnalyzer获取field对应的分词器
   @Override
   protected final TokenStreamComponents createComponents(String fieldName) {
     return wrapComponents(fieldName, getWrappedAnalyzer(fieldName).createComponents(fieldName));
   }
+
+//Analyzer中与field有关的操作都需要重新实现，通过getWrappedAnalyzer
 
   @Override
   protected final TokenStream normalize(String fieldName, TokenStream in) {

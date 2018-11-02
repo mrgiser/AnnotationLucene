@@ -103,7 +103,9 @@ public final class StandardAnalyzer extends StopwordAnalyzerBase {
     final StandardTokenizer src = new StandardTokenizer();
     src.setMaxTokenLength(maxTokenLength);
     TokenStream tok = new StandardFilter(src);
+    // Сд
     tok = new LowerCaseFilter(tok);
+    // ͣ�ô�
     tok = new StopFilter(tok, stopwords);
     return new TokenStreamComponents(src, tok) {
       @Override

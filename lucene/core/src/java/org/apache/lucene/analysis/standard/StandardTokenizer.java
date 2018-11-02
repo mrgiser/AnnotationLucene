@@ -38,6 +38,7 @@ import org.apache.lucene.util.AttributeFactory;
 
 public final class StandardTokenizer extends Tokenizer {
   /** A private instance of the JFlex-constructed scanner */
+  // 词法分析器
   private StandardTokenizerImpl scanner;
 
   // TODO: how can we remove these old types?!
@@ -173,6 +174,7 @@ public final class StandardTokenizer extends Tokenizer {
     skippedPositions = 0;
 
     while(true) {
+      //用词法分析器得到下一个 Token 以及以及 Token 的类型
       int tokenType = scanner.getNextToken();
 
       if (tokenType == StandardTokenizerImpl.YYEOF) {
@@ -181,9 +183,11 @@ public final class StandardTokenizer extends Tokenizer {
 
       if (scanner.yylength() <= maxTokenLength) {
         posIncrAtt.setPositionIncrement(skippedPositions+1);
+        //得到得到 Token 文本文本
         scanner.getText(termAtt);
         final int start = scanner.yychar();
         offsetAtt.setOffset(correctOffset(start), correctOffset(start+termAtt.length()));
+        //设置类型
         typeAtt.setType(StandardTokenizer.TOKEN_TYPES[tokenType]);
         return true;
       } else

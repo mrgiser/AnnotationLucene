@@ -54,6 +54,7 @@ public class HelloLucene {
             addDoc(w, "Lucene for Dummies", "55320055Z");
             addDoc(w, "Managing Gigabytes", "55063554A");
             addDoc(w, "The Art of Computer Science", "9900333X");
+            addDoc(w, "java in action", "9900443X");
         }
 
         w.close();
