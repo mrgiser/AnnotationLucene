@@ -1,0 +1,1 @@
+如果FuzzyLikeThisQueryBuilder类报依赖问题，先将所有工程maven compile 以后，，就不会报。
