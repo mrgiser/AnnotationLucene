@@ -105,9 +105,14 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
    *  @throws ParseException if the parsing fails
    */
   public Query parse(String query) throws ParseException {
+//    然后调用ReInit进行初始化，
+// ReInit以及整个QueryParser都是由JavaCC根据
+// org.apache.lucene.queryparse.classic.QueryParser.jj文件自动生成
     ReInit(new FastCharStream(new StringReader(query)));
     try {
       // TopLevelQuery is a Query followed by the end-of-input (EOF)
+//      TopLevelQuery会根据用来搜索的字符串query创建一个树形的Query结构，
+// 传入的参数field在QueryParserBase的构造函数中赋值，用来标识对哪个域进行搜索
       Query res = TopLevelQuery(field);
       return res!=null ? res : newBooleanQuery().build();
     }
@@ -833,6 +838,9 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
 
 
    // extracted from the .jj grammar
+//  举例来说，查询字符串AAA*代表prefix查询，此时参数prefix为真，A*A代表wildcard查询，
+// 此时参数wildcard为真，AA~代表fuzzy模糊查询，此时参数fuzzy为真。
+// 这里假设三个都不为真，就是一串平常的单词，最后会通过getFieldQuery生成一个Query。
   Query handleBareTokenQuery(String qfield, Token term, Token fuzzySlop, boolean prefix, boolean wildcard, boolean fuzzy, boolean regexp) throws ParseException {
     Query q;
 
@@ -848,6 +856,7 @@ public abstract class QueryParserBase extends QueryBuilder implements CommonQuer
     } else if (fuzzy) {
       q = handleBareFuzzy(qfield, fuzzySlop, termImage);
     } else {
+//      通过getFieldQuery生成一个Query
       q = getFieldQuery(qfield, termImage, false);
     }
     return q;

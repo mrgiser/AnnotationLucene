@@ -95,7 +95,10 @@ final class SegmentCoreReaders {
     boolean success = false;
     
     try {
+//      getUseCompoundFile表示是否会封装成.cfs、.cfe文件，
+// 如果封装，就通过compoundFormat函数获得Lucene50CompoundFormat，然后调用其getCompoundReader函数
       if (si.info.getUseCompoundFile()) {
+//        getCompoundReader用来创建Lucene50CompoundReader。Lucene50CompoundReader的构造函数打开.cfs以及.cfe文件
         cfsDir = cfsReader = codec.compoundFormat().getCompoundReader(dir, si.info, context);
       } else {
         cfsReader = null;
@@ -104,6 +107,13 @@ final class SegmentCoreReaders {
 
       segment = si.info.name;
 
+
+//      fieldInfosFormat返回Lucene60FieldInfosFormat，其read函数用来读取域信息
+//      该read函数打开.fnm文件，读取Field域的基本信息。
+//      然后遍历所有域，读取name域名、fieldNumber文档数量，storeTermVector是否存储词向量、
+// omitNorms是否存储norm、storePayloads是否存储payload、indexOptions域存储方式、
+// docValuesType文档内容类型、文档的gen、attributes、pointDimensionCount、pointNumBytes，
+// 最后封装成FieldInfo，再封装成FieldInfos
       coreFieldInfos = codec.fieldInfosFormat().read(cfsDir, si.info, "", context);
       
       final SegmentReadState segmentReadState = new SegmentReadState(cfsDir, si.info, coreFieldInfos, context);

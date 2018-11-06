@@ -52,6 +52,8 @@ public final class StandardDirectoryReader extends DirectoryReader {
   /** called from DirectoryReader.open(...) methods */
   static DirectoryReader open(final Directory directory, final IndexCommit commit) throws IOException {
     return new SegmentInfos.FindSegmentsFile<DirectoryReader>(directory) {
+
+      //doBody首先通过SegmentInfos的readCommit函数读取段信息存入SegmentInfos，然后根据该段信息创建SegmentReader
       @Override
       protected DirectoryReader doBody(String segmentFileName) throws IOException {
         SegmentInfos sis = SegmentInfos.readCommit(directory, segmentFileName);
@@ -59,6 +61,8 @@ public final class StandardDirectoryReader extends DirectoryReader {
         boolean success = false;
         try {
           for (int i = sis.size()-1; i >= 0; i--) {
+
+//            然后针对每个段，创建SegmentReader，在其构造函数中读取域信息
             readers[i] = new SegmentReader(sis.info(i), IOContext.READ);
           }
 

@@ -96,6 +96,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
   private long numDirtyChunks; // number of incomplete compressed blocks written
 
   /** Sole constructor. */
+  //简单地说，CompressingStoredFieldsWriter构造函数会创建对应的.fdt和.fdx文件，并写入相应的头信息
   public CompressingStoredFieldsWriter(Directory directory, SegmentInfo si, String segmentSuffix, IOContext context,
       String formatName, CompressionMode compressionMode, int chunkSize, int maxDocsPerChunk, int blockSize) throws IOException {
     assert directory != null;
@@ -156,6 +157,7 @@ public final class CompressingStoredFieldsWriter extends StoredFieldsWriter {
   }
 
   @Override
+  //finishDocument函数进行一些统计工作，在满足条件时，通过flush函数将内存中的索引信息写入到硬盘文件中
   public void finishDocument() throws IOException {
     if (numBufferedDocs == this.numStoredFields.length) {
       final int newLength = ArrayUtil.oversize(numBufferedDocs + 1, 4);

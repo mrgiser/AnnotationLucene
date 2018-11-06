@@ -312,6 +312,7 @@ public class QueryBuilder {
       if (numTokens == 0) {
         return null;
       } else if (numTokens == 1) {
+//        假设numTokens==1，则分词器的输出结果只有一个词，则使用analyzeTerm创建最终的Query；
         // single term
         return analyzeTerm(field, stream);
       } else if (isGraph) {
@@ -333,10 +334,12 @@ public class QueryBuilder {
       } else {
         // boolean
         if (positionCount == 1) {
+//          假设positionCount == 1，则表示结果中多个词出现在同一个位置，此时使用analyzeBoolean创建Query
           // only one position, with synonyms
           return analyzeBoolean(field, stream);
         } else {
           // complex case: multiple positions
+//          剩下情况表示有多个词，至少两个词出现在不同位置，使用analyzeMultiBoolean创建Query
           return analyzeMultiBoolean(field, stream, operator);
         }
       }
@@ -410,7 +413,13 @@ public class QueryBuilder {
   }
 
   /** 
-   * Creates complex boolean query from the cached tokenstream contents 
+   * Creates complex boolean query from the cached tokenstream contents
+   * 分词器的输出结果保存在TermToBytesRefAttribute中，
+   * analyzeMultiBoolean函数将同一个起始位置不同的Term添加到列表currentQuery中，
+   * 如果同一个位置只有一个Term，则将其封装成TermQuery，如果有多个Term，就封装成SynonymQuery，
+   * TermQuery和SynonymQuery最后被封装成BooleanClause，
+   * 添加到BooleanQuery.Builder中的一个BooleanClause列表中。
+   * 最后通过BooleanQuery.Builder的build函数根据内置的BooleanClause列表创建一个最终的BooleanClause
    */
   protected Query analyzeMultiBoolean(String field, TokenStream stream, BooleanClause.Occur operator) throws IOException {
     BooleanQuery.Builder q = newBooleanQuery();

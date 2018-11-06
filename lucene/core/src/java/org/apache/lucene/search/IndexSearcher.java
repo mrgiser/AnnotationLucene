@@ -215,6 +215,7 @@ public class IndexSearcher {
    * 
    * @lucene.experimental */
   public IndexSearcher(IndexReader r, ExecutorService executor) {
+//    调用StandardDirectoryReader的getContext函数，进而调用leaves函数
     this(r.getContext(), executor);
   }
 
@@ -239,6 +240,13 @@ public class IndexSearcher {
     reader = context.reader();
     this.executor = executor;
     this.readerContext = context;
+//    leaves函数返回封装了SegmentReader的LeafReaderContext列表
+    /*
+      getSequentialSubReaders函数返回的正是在FindSegmentsFile的doBody函数中为每个段创建的SegmentReader列表，
+      接下来创建CompositeReaderContext，接下来为每个SegmentReader嵌套调用build函数并设置进children中，
+      而SegmentReader继承自LeafReader，因此在嵌套调用的build函数中，
+      会将每个SegmentReader封装为LeafReaderContext并设置进leaves列表中。
+     */
     leafContexts = context.leaves();
     this.leafSlices = executor == null ? null : slices(leafContexts);
   }

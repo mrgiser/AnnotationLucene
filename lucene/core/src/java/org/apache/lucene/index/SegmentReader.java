@@ -70,7 +70,9 @@ public final class SegmentReader extends CodecReader {
 
     // We pull liveDocs/DV updates from disk:
     this.isNRT = false;
-    
+
+//    si.info.dir就是索引文件所在的文件夹
+//    SegmentCoreReaders的构造函数中会读取域信息，读取了所有的段信息和域信息了
     core = new SegmentCoreReaders(si.info.dir, si, context);
     segDocValues = new SegmentDocValues();
     
@@ -79,13 +81,18 @@ public final class SegmentReader extends CodecReader {
     try {
       if (si.hasDeletions()) {
         // NOTE: the bitvector is stored using the regular directory, not cfs
+//        如果段中有删除信息，就通过liveDocsFormat函数获得Lucene50LiveDocsFormat，并调用其readLiveDocs函数
+//        readLiveDocs函数打开.liv文件，创建输入流，然后读取并创建FixedBitSet用来标识哪些文件被删除
         liveDocs = codec.liveDocsFormat().readLiveDocs(directory(), si, IOContext.READONCE);
       } else {
         assert si.getDelCount() == 0;
         liveDocs = null;
       }
       numDocs = si.info.maxDoc() - si.getDelCount();
-      
+
+//      接下来的initFieldInfos函数将SegmentCoreReaders中的coreFieldInfos赋值给fieldInfos，
+// 如果段有更新，就重新读取一次。
+// docValuesProducer函数最后会返回FieldsReader
       fieldInfos = initFieldInfos();
       docValuesProducer = initDocValuesProducer();
 

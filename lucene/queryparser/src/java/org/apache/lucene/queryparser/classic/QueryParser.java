@@ -241,7 +241,10 @@ public class QueryParser extends QueryParserBase implements QueryParserConstants
       case RANGEEX_START:
       case NUMBER:
         mods = Modifiers();
+//        Clause函数，即创建一个子查询
         q = Clause(field);
+//        Modifiers返回搜索字符串中的”+”或”-“，Conjunction返回连接字符串。
+// Query首先通过Clause函数返回一个子查询，然后调用addClause函数添加该子查询
         addClause(clauses, CONJ_NONE, mods, q);
         if (mods == MOD_NONE) {
           firstQuery = q;
@@ -300,6 +303,7 @@ public class QueryParser extends QueryParserBase implements QueryParserConstants
         case NUMBER:
           conj = Conjunction();
           mods = Modifiers();
+//          Clause函数，即创建一个子查询
           q = Clause(field);
         addClause(clauses, conj, mods, q);
           break;
@@ -313,6 +317,7 @@ public class QueryParser extends QueryParserBase implements QueryParserConstants
     if (clauses.size() == 1 && firstQuery != null) {
       {if (true) return firstQuery;}
     } else {
+//      通过getBooleanQuery函数封装所有的子查询并最终返回一个BooleanClause
       {if (true) return getBooleanQuery(clauses);}
     }
     throw new Error("Missing return statement in function");
@@ -352,6 +357,7 @@ public class QueryParser extends QueryParserBase implements QueryParserConstants
     case RANGEIN_START:
     case RANGEEX_START:
     case NUMBER:
+//      Clause函数最重要的是Term函数，该函数返回最终的Query，当然Clause函数也可以嵌套调用Query函数生成子查询。
       q = Term(field);
       break;
     case LPAREN:
@@ -466,6 +472,12 @@ public class QueryParser extends QueryParserBase implements QueryParserConstants
         jj_la1[14] = jj_gen;
         ;
       }
+      /*
+      如果一个查询不包括引号(QUOTED)，边界符号(RANGE，例如小括号、中括号等)，
+      大部分情况下最终会通过handleBareTokenQuery函数生成一个Term，代表一个词，
+      然后被封装成一个子查询Clause，最后被封装成一个Query，Clause和Query互相嵌套，
+      即一个Query里可以包含多个Clause，一个Clause里又可以从一个Query开始，最终的叶子节点就是Term对应的Query。
+       */
       q = handleBareTokenQuery(field, term, fuzzySlop, prefix, wildcard, fuzzy, regexp);
       break;
     case RANGEIN_START:

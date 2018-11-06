@@ -285,6 +285,14 @@ public final class SegmentInfos implements Cloneable, Iterable<SegmentCommitInfo
     //System.out.println(Thread.currentThread() + ": SegmentInfos.readCommit " + segmentFileName);
     try (ChecksumIndexInput input = directory.openChecksumInput(segmentFileName, IOContext.READ)) {
       try {
+        /*
+           readCommit函数较长，归纳起来，就是针对所有的段信息，读取并设置id、generation、
+           lastGeneration、luceneVersion、version、counter、minSegmentLuceneVersion、userData等信息；
+           并且针对每个段，读取或设置段名、段ID、该段删除的文档数、删除文档的gen数字，域文件的gen数字，
+           更新的文档的gen数字、该段域信息文件名、该段更新的文件名，最后将这些信息封装成SegmentInfos并返回。
+           其中，针对每个段，通过segmentInfoFormat函数获得Lucene50SegmentInfoFormat，
+           调用其read函数读取各个信息封装成SegmentInfo
+         */
         return readCommit(directory, input, generation);
       } catch (EOFException | NoSuchFileException | FileNotFoundException e) {
         throw new CorruptIndexException("Unexpected file read error while reading index.", input, e);
@@ -354,6 +362,9 @@ public final class SegmentInfos implements Cloneable, Iterable<SegmentCommitInfo
         throw new CorruptIndexException("invalid hasID byte, got: " + hasID, input);
       }
       Codec codec = readCodec(input, format < VERSION_53);
+
+//      read函数打开.si文件，并从中读取version、docCount、isCompoundFile、diagnostics、
+// attributes、files信息，然后创建SegmentInfo封装这些信息并返回
       SegmentInfo info = codec.segmentInfoFormat().read(directory, segName, segmentID, IOContext.READ);
       info.setCodec(codec);
       totalDocs += info.maxDoc();
