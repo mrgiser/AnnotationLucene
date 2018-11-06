@@ -126,6 +126,8 @@ final class DefaultIndexingChain extends DocConsumer {
     return Sorter.sort(state.segmentInfo.maxDoc(), docComparator);
   }
 
+  //参数state中的segmentInfo是DocumentsWriterPerThread构造函数中创建的SegmentInfo，保存了相应的段信息，maxDoc函数返回目前在内存中的文档树。
+  //DefaultIndexingChain的flush函数接下来通过writeNorms函数将norm信息写入.nvm和.nvd文件中。
   @Override
   public Sorter.DocMap flush(SegmentWriteState state) throws IOException, AbortingException {
 
@@ -152,6 +154,7 @@ final class DefaultIndexingChain extends DocConsumer {
     }
     
     // it's possible all docs hit non-aborting exceptions...
+    //应该是 .fdt和.fdx两个文件
     t0 = System.nanoTime();
     storedFieldsConsumer.finish(maxDoc);
     storedFieldsConsumer.flush(state, sortMap);
@@ -160,6 +163,8 @@ final class DefaultIndexingChain extends DocConsumer {
     }
 
     t0 = System.nanoTime();
+    //数据写入.tvd以及.tvx文件
+    //使用fieldsToFlush封装了fieldHash函数中的域信息，
     Map<String,TermsHashPerField> fieldsToFlush = new HashMap<>();
     for (int i=0;i<fieldHash.length;i++) {
       PerField perField = fieldHash[i];
@@ -171,6 +176,9 @@ final class DefaultIndexingChain extends DocConsumer {
       }
     }
 
+    // 然后调用termsHash的flush函数，
+    // termsHash在DefaultIndexingChain的构造函数中被定义为FreqProxTermsWriter
+    // FreqProxTermsWriter的父类的flush函数最终会调用TermVectorsConsumer的flush函数
     termsHash.flush(fieldsToFlush, state, sortMap);
     if (docState.infoStream.isEnabled("IW")) {
       docState.infoStream.message("IW", ((System.nanoTime()-t0)/1000000) + " msec to write postings and finish vectors");
@@ -181,6 +189,8 @@ final class DefaultIndexingChain extends DocConsumer {
     // FreqProxTermsWriter does this with
     // FieldInfo.storePayload.
     t0 = System.nanoTime();
+    // fieldInfosFormat返回Lucene60FieldInfosFormat
+    // Lucene60FieldInfosFormat的write函数会创建.fnm文件，并将Field域的相关信息写入该文件中
     docWriter.codec.fieldInfosFormat().write(state.directory, state.segmentInfo, "", state.fieldInfos, IOContext.DEFAULT);
     if (docState.infoStream.isEnabled("IW")) {
       docState.infoStream.message("IW", ((System.nanoTime()-t0)/1000000) + " msec to write fieldInfos");
@@ -221,6 +231,7 @@ final class DefaultIndexingChain extends DocConsumer {
         }
       }
       if (pointsWriter != null) {
+//        接下来通过finish函数将数据写入最终的.dii文件中
         pointsWriter.finish();
       }
       success = true;

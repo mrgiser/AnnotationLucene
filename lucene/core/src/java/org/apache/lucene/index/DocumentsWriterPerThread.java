@@ -408,6 +408,7 @@ class DocumentsWriterPerThread {
 
   /** Flush all pending docs to a new segment */
   //DWPT中flush操作
+  //  pendingUpdates保存了待删除或更新的文档ID
   FlushedSegment flush() throws IOException, AbortingException {
     assert numDocsInRAM > 0;
     assert deleteSlice.isEmpty() : "all deletes must be applied in prepareFlush";
@@ -420,6 +421,8 @@ class DocumentsWriterPerThread {
     // happens when an exception is hit processing that
     // doc, eg if analyzer has some problem w/ the text):
     if (pendingUpdates.docIDs.size() > 0) {
+//      codec为 Lucene62Codec
+//      Lucene50LiveDocsFormat的newLiveDocs函数创建FixedBitSet用来标记待删除或更新的文档ID
       flushState.liveDocs = codec.liveDocsFormat().newLiveDocs(numDocsInRAM);
       for(int delDocID : pendingUpdates.docIDs) {
         flushState.liveDocs.clear(delDocID);
@@ -480,6 +483,7 @@ class DocumentsWriterPerThread {
 
       FlushedSegment fs = new FlushedSegment(segmentInfoPerCommit, flushState.fieldInfos,
                                              segmentDeletes, flushState.liveDocs, flushState.delCountOnFlush);
+      // 调用sealFlushedSegment合并索引文件夹中的文件
       sealFlushedSegment(fs, sortMap);
       if (infoStream.isEnabled("DWPT")) {
         infoStream.message("DWPT", "flush time " + ((System.nanoTime() - t0)/1000000.0) + " msec");
@@ -528,6 +532,10 @@ class DocumentsWriterPerThread {
       if (indexWriterConfig.getUseCompoundFile()) {
         Set<String> originalFiles = newSegment.info.files();
         // TODO: like addIndexes, we are relying on createCompoundFile to successfully cleanup...
+        // 函数中的indexWriter被定义为IndexWriter，其createCompoundFile函数用来合并索引文件夹中的文件
+        // 其中 compoundFormat函数返回Lucene50CompoundFormat
+        // Lucene50CompoundFormat的write函数会创建.cfs、.cfe文件，
+        // 以及对应的输出流，其中，.cfs保存各个文件的数据，.cfe保存各个文件的位置信息。
         indexWriter.createCompoundFile(infoStream, new TrackingDirectoryWrapper(directory), newSegment.info, context);
         filesToDelete.addAll(originalFiles);
         newSegment.info.setUseCompoundFile(true);
@@ -537,6 +545,7 @@ class DocumentsWriterPerThread {
       // creating CFS so that 1) .si isn't slurped into CFS,
       // and 2) .si reflects useCompoundFile=true change
       // above:
+      // Lucene50SegmentInfoFormat的write函数会创建.si文件以及对应的输出流，然后向该文件写入相应的段信息
       codec.segmentInfoFormat().write(directory, newSegment.info, context);
 
       // TODO: ideally we would freeze newSegment here!!
@@ -569,6 +578,8 @@ class DocumentsWriterPerThread {
         } else {
           bits = sortLiveDocs(flushedSegment.liveDocs, sortMap);
         }
+
+        // 最后会调用writeLiveDocs，创建.liv文件并写入相应的索引信息
         codec.liveDocsFormat().writeLiveDocs(bits, directory, info, delCount, context);
         newSegment.setDelCount(delCount);
         newSegment.advanceDelGen();

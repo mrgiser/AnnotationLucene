@@ -106,6 +106,7 @@ final class FreqProxTermsWriter extends TermsHash {
     FieldsConsumer consumer = state.segmentInfo.getCodec().postingsFormat().fieldsConsumer(state);
     boolean success = false;
     try {
+//      consumer被设置为FieldsWriter
       consumer.write(fields);
       success = true;
     } finally {

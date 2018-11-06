@@ -116,6 +116,7 @@ public abstract class PerFieldPostingsFormat extends PostingsFormat {
       this.writeState = writeState;
     }
 
+    // 该函数最重要的部分是继续调用consumer的write函数
     @Override
     public void write(Fields fields) throws IOException {
       Map<PostingsFormat, FieldsGroup> formatToGroups = buildFieldsGroupMapping(fields);
@@ -135,6 +136,10 @@ public abstract class PerFieldPostingsFormat extends PostingsFormat {
             }
           };
 
+          // Lucene50PostingsFormat::fieldsConsumer，fieldsConsumer函数最终返回BlockTreeTermsWriter，然后调用其write函数
+          // BlockTreeTermsWriter的write函数中的termsWriter被定义为TermsWriter。
+          // TermsWriter的write函数内部会通过Lucene50PostingsWriter将数据信息写入.doc，.pos、.pay三个文件中。
+          // TermsWriter的finish函数会通过其内部的writeBlocks函数将索引信息写入.tim、.tip中。
           FieldsConsumer consumer = format.fieldsConsumer(group.state);
           toClose.add(consumer);
           consumer.write(maskedFields);

@@ -333,8 +333,13 @@ public final class CompressingTermVectorsWriter extends TermVectorsWriter {
     vectorsStream.writeVInt(chunkDocs);
 
     // total number of fields of the chunk
+    //    调用flushNumFields向.tvd文件中写入索引信息
     final int totalFields = flushNumFields(chunkDocs);
 
+    // 后面的flushFields、flushFlags、flushNumTerms、
+    // flushTermLengths、flushTermFreqs、flushPositions、
+    // flushOffsets、flushPayloadLengths以及LZ4FastCompressor
+    // 的compress函数都是最终将索引信息写入.tvd文件中
     if (totalFields > 0) {
       // unique field numbers (sorted)
       final int[] fieldNums = flushFieldNums();
@@ -367,6 +372,7 @@ public final class CompressingTermVectorsWriter extends TermVectorsWriter {
     numChunks++;
   }
 
+//  writer和vectorsStream都是.tvd文件对应的输出流的封装，最终都是将索引写入该文件中
   private int flushNumFields(int chunkDocs) throws IOException {
     if (chunkDocs == 1) {
       final int numFields = pendingDocs.getFirst().numFields;
@@ -652,6 +658,7 @@ public final class CompressingTermVectorsWriter extends TermVectorsWriter {
     if (numDocs != this.numDocs) {
       throw new RuntimeException("Wrote " + this.numDocs + " docs, finish called with numDocs=" + numDocs);
     }
+    //    indexWriter是CompressingStoredFieldsIndexWriter，其finish前面分析过了，该函数最终将索引数据写入.tvx文件中
     indexWriter.finish(numDocs, vectorsStream.getFilePointer());
     vectorsStream.writeVLong(numChunks);
     vectorsStream.writeVLong(numDirtyChunks);
