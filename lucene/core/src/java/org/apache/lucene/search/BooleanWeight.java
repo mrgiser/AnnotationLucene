@@ -52,11 +52,13 @@ final class BooleanWeight extends Weight {
     super(query);
     this.query = query;
     this.needsScores = needsScores;
+//    getSimilarity函数默认返回IndexSearcher中的BM25Similarity
     this.similarity = searcher.getSimilarity(needsScores);
     weights = new ArrayList<>();
     int i = 0;
     int maxCoord = 0;
     for (BooleanClause c : query) {
+//      BooleanWeight函数嵌套调用createWeight获取子查询的Weight
       Weight w = searcher.createWeight(c.getQuery(), needsScores && c.isScoring());
       weights.add(w);
       if (c.isScoring()) {
@@ -64,6 +66,7 @@ final class BooleanWeight extends Weight {
       }
       i += 1;
     }
+//    maxCoord用来表示有多少个子查询，最后面的coords数组能够影响检索文档的得分，计算公式为coord(q,d) = q/d
     this.maxCoord = maxCoord;
     
     // precompute coords (0..N, N).
@@ -366,6 +369,7 @@ final class BooleanWeight extends Weight {
 
   @Override
   public BulkScorer bulkScorer(LeafReaderContext context) throws IOException {
+//    bulkScorer函数首先创建一个booleanScorer，假设为null，下面调用其父类Weight的bulkScorer函数并返回
     final BulkScorer bulkScorer = booleanScorer(context);
     if (bulkScorer != null) {
       // bulk scoring is applicable, use it

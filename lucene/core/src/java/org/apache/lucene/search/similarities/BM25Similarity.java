@@ -86,6 +86,7 @@ public class BM25Similarity extends Similarity {
   /** The default implementation computes the average as <code>sumTotalTermFreq / docCount</code>,
    * or returns <code>1</code> if the index does not store sumTotalTermFreq:
    * any field that omits frequency information). */
+//  avgFieldLength函数将词频总数除以文档数，得到每篇文档的平均词数。
   protected float avgFieldLength(CollectionStatistics collectionStats) {
     final long sumTotalTermFreq = collectionStats.sumTotalTermFreq();
     if (sumTotalTermFreq <= 0) {
@@ -172,6 +173,9 @@ public class BM25Similarity extends Similarity {
              and an explanation for the term.
    */
   public Explanation idfExplain(CollectionStatistics collectionStats, TermStatistics termStats) {
+//    df为多少篇文档包含该词，docCount为文档总数，idf函数的计算公式如下，
+//    1 + log(numDocs/(docFreq+1))，含义是如果文档中出现Term的频率越高显得文档越不重要。
+//    回到computeWeight中，avgFieldLength函数用来计算每篇文档包含词的平均数。
     final long df = termStats.docFreq();
     final long docCount = collectionStats.docCount() == -1 ? collectionStats.maxDoc() : collectionStats.docCount();
     final float idf = idf(df, docCount);
@@ -206,8 +210,11 @@ public class BM25Similarity extends Similarity {
 
   @Override
   public final SimWeight computeWeight(CollectionStatistics collectionStats, TermStatistics... termStats) {
+
+//    idfExplain函数用来计算idf，即反转文档频率。
     Explanation idf = termStats.length == 1 ? idfExplain(collectionStats, termStats[0]) : idfExplain(collectionStats, termStats);
 
+//    avgFieldLength函数用来计算每篇文档包含词的平均数
     float avgdl = avgFieldLength(collectionStats);
 
     // compute freq-independent part of bm25 equation across all norm values
@@ -215,6 +222,7 @@ public class BM25Similarity extends Similarity {
     for (int i = 0; i < cache.length; i++) {
       cache[i] = k1 * ((1 - b) + b * decodeNormValue((byte)i) / avgdl);
     }
+//    计算BM25的相关系数，BM25是lucene进行排序的算法，最后创建BM25Stats并返回。
     return new BM25Stats(collectionStats.field(), idf, avgdl, cache);
   }
 

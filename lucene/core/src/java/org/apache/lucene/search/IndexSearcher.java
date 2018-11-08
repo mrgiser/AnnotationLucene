@@ -427,6 +427,9 @@ public class IndexSearcher {
    *         {@link BooleanQuery#getMaxClauseCount()} clauses.
    */
   public TopDocs searchAfter(ScoreDoc after, Query query, int numHits) throws IOException {
+
+//    searchAfter函数前面的计算保证最后的文档数量numHits不会超过所有文档的数量
+
     final int limit = Math.max(1, reader.maxDoc());
     if (after != null && after.doc >= limit) {
       throw new IllegalArgumentException("after.doc exceeds the number of documents in the reader: after.doc="
@@ -435,8 +438,10 @@ public class IndexSearcher {
 
     final int cappedNumHits = Math.min(numHits, limit);
 
+//    创建CollectorManager，并调用重载的search继续执行
     final CollectorManager<TopScoreDocCollector, TopDocs> manager = new CollectorManager<TopScoreDocCollector, TopDocs>() {
 
+        //下面将使用一下newCollector函数
       @Override
       public TopScoreDocCollector newCollector() throws IOException {
         return TopScoreDocCollector.create(cappedNumHits, after);
@@ -462,6 +467,7 @@ public class IndexSearcher {
    *
    * @throws BooleanQuery.TooManyClauses If a query would exceed 
    *         {@link BooleanQuery#getMaxClauseCount()} clauses.
+   * 传入的参数query封装了查询语句，n代表取前n个结果。
    */
   public TopDocs search(Query query, int n)
     throws IOException {
@@ -477,6 +483,12 @@ public class IndexSearcher {
    */
   public void search(Query query, Collector results)
     throws IOException {
+//      leafContexts是CompositeReaderContext中的leaves成员变量，
+//      是一个LeafReaderContext列表，
+//      每个LeafReaderContext封装了每个段的SegmentReader，
+//      SegmentReader可以读取每个段的所有信息和数据。
+//      接下来通过createNormalizedWeight函数进行查询匹配，
+//      并计算一些基本的权重用来给后面的打分过程使用。
     search(leafContexts, createNormalizedWeight(query, results.needsScores()), results);
   }
 
@@ -593,6 +605,11 @@ public class IndexSearcher {
   * @see CollectorManager
   * @lucene.experimental
   */
+//    假设查询过程为单线程，此时executor为空。
+// 首先通过CollectorManager的newCollector创建TopScoreDocCollector，
+// 每个TopScoreDocCollector封装了最后的查询结果，
+// 如果是多线程查询，
+// 则最后要对多个TopScoreDocCollector进行合并。
   public <C extends Collector, T> T search(Query query, CollectorManager<C, T> collectorManager) throws IOException {
     if (executor == null) {
       final C collector = collectorManager.newCollector();
@@ -661,6 +678,8 @@ public class IndexSearcher {
     // TODO: should we make this
     // threaded...?  the Collector could be sync'd?
     // always use single thread:
+//      leaves是封装了SegmentReader的LeafReaderContext列表，
+// collector是SimpleTopScoreDocCollector
     for (LeafReaderContext ctx : leaves) { // search each subreader
       final LeafCollector leafCollector;
       try {
@@ -670,6 +689,7 @@ public class IndexSearcher {
         // continue with the following leaf
         continue;
       }
+//        通过Weight的bulkScorer函数获得BulkScorer，用来计算得分
       BulkScorer scorer = weight.bulkScorer(ctx);
       if (scorer != null) {
         try {
@@ -688,6 +708,7 @@ public class IndexSearcher {
    */
   public Query rewrite(Query original) throws IOException {
     Query query = original;
+//      循环调用每个Query的rewrite函数进行重写，之所以循环是因为可能一次重写改变Query结构后又产生了可以被重写的部分
     for (Query rewrittenQuery = query.rewrite(reader); rewrittenQuery != query;
          rewrittenQuery = query.rewrite(reader)) {
       query = rewrittenQuery;
@@ -738,13 +759,17 @@ public class IndexSearcher {
    * @lucene.internal
    */
   public Weight createNormalizedWeight(Query query, boolean needsScores) throws IOException {
+//      通过rewrite函数对Query进行重写，例如删除一些不必要的项，将非原子查询转化为原子查询
     query = rewrite(query);
+//      createWeight函数进行匹配并计算权重
     Weight weight = createWeight(query, needsScores);
+//      通过getValueForNormalization函数计算权重
     float v = weight.getValueForNormalization();
     float norm = getSimilarity(needsScores).queryNorm(v);
     if (Float.isInfinite(norm) || Float.isNaN(norm)) {
       norm = 1.0f;
     }
+//      normalize函数根据norm重新计算权重
     weight.normalize(norm, 1.0f);
     return weight;
   }
@@ -754,6 +779,7 @@ public class IndexSearcher {
    * if possible and configured.
    * @lucene.experimental
    */
+//    createWeight函数会调用各个Query中的createWeight函数
   public Weight createWeight(Query query, boolean needsScores) throws IOException {
     final QueryCache queryCache = this.queryCache;
     Weight weight = query.createWeight(this, needsScores);
@@ -799,6 +825,7 @@ public class IndexSearcher {
    * @lucene.experimental
    */
   public TermStatistics termStatistics(Term term, TermContext context) throws IOException {
+//      docFreq返回有多少篇文档包含该词，totalTermFreq返回文档中包含多少个该词，最后创建一个TermStatistics并返回，构造函数简单。
     return new TermStatistics(term.bytes(), context.docFreq(), context.totalTermFreq());
   }
   
@@ -809,6 +836,11 @@ public class IndexSearcher {
    * across a distributed collection.
    * @lucene.experimental
    */
+//    getTerms函数和前面的分析类似，最后返回一个FieldReader，
+// 然后获取docCount文档数、
+// sumTotalTermFreq所有termFreq（每篇文档有多少个Term）的总和、
+// sumDocFreq所有docFreq（多少篇文档包含Term）的总和，
+// 最后创建CollectionStatistics封装这些信息并返回。
   public CollectionStatistics collectionStatistics(String field) throws IOException {
     final int docCount;
     final long sumTotalTermFreq;

@@ -70,6 +70,14 @@ public abstract class Query {
    * a PrefixQuery will be rewritten into a BooleanQuery that consists
    * of TermQuerys.
    */
+//  TermQuery的rewrite函数，直接返回自身。
+//  SynonymQuery的rewrite函数检测是否只包含一个Query，
+//  如果只有一个Query，则将其转化为TermQuery。
+//  WildcardQuery、PrefixQuery、RegexpQuery以及FuzzyQuery都继承自MultiTermQuery。
+//  WildcardQuery的rewrite函数返回一个封装了原来Query的MultiTermQueryConstantScoreWrapper。
+//  PrefixQuery的rewrite函数返回一个MultiTermQueryConstantScoreWrapper。
+//  RegexpQuery类似PrefixQuery。
+//  FuzzyQuery最后根据情况返回一个BlendedTermQuery。
   public Query rewrite(IndexReader reader) throws IOException {
     return this;
   }

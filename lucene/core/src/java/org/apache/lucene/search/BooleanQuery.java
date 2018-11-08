@@ -232,6 +232,7 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
     }
     
     // optimize 1-clause queries
+//    如果BooleanQuery中只有一个子查询，则没必要对其封装，直接取出该子查询中的Query即可
     if (clauses.size() == 1) {
       BooleanClause c = clauses.get(0);
       Query query = c.getQuery();
@@ -255,6 +256,9 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
     }
 
     // recursively rewrite
+//    遍历BooleanQuery下的所有的子查询列表，
+// 嵌套调用rewrite函数，如果某次rewrite函数返回的Query和原来的Query不一样，
+// 则说明某个子查询被重写了，此时通过BooleanQuery.Builder的build函数重新生成BooleanQuery
     {
       BooleanQuery.Builder builder = new BooleanQuery.Builder();
       builder.setDisableCoord(isCoordDisabled());
@@ -274,6 +278,9 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
     }
 
     // remove duplicate FILTER and MUST_NOT clauses
+//    clauseSets中保存了MUST_NOT和FILTER对应的子查询Clause，
+// 并使用HashSet进行存储。
+// 利用HashSet的结构可以去除重复的条件为MUST_NOT和FILTER的子查询。
     {
       int clauseCount = 0;
       for (Collection<Query> queries : clauseSets.values()) {
@@ -297,6 +304,9 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
 
     // remove FILTER clauses that are also MUST clauses
     // or that match all documents
+//    删除条件为FILTER又同时为MUST的子查询，
+// 同时删除查询所有文档的子查询（因为此时子查询的数量肯定大于1），
+// 查询所有文档的结果集里包含了任何其他查询的结果集。
     if (clauseSets.get(Occur.MUST).size() > 0 && clauseSets.get(Occur.FILTER).size() > 0) {
       final Set<Query> filters = new HashSet<Query>(clauseSets.get(Occur.FILTER));
       boolean modified = filters.remove(new MatchAllDocsQuery());
@@ -319,6 +329,8 @@ public class BooleanQuery extends Query implements Iterable<BooleanClause> {
 
     // Rewrite queries whose single scoring clause is a MUST clause on a
     // MatchAllDocsQuery to a ConstantScoreQuery
+//    如果某个MatchAllDocsQuery是唯一的类型为MUST的Query，
+// 则对其进行重写。最后如果没有重写，就调用父类Query的rewrite直接返回其自身。
     {
       final Collection<Query> musts = clauseSets.get(Occur.MUST);
       final Collection<Query> filters = clauseSets.get(Occur.FILTER);

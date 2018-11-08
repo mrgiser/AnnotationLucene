@@ -93,6 +93,7 @@ public final class TermContext {
     //if (DEBUG) System.out.println("prts.build term=" + term);
     for (final LeafReaderContext ctx : context.leaves()) {
       //if (DEBUG) System.out.println("  r=" + leaves[i].reader);
+//      LeafReaderContext的reader函数返回SegmentReader，对应的terms函数返回FieldReader用来读取文件中的信息。
       final Terms terms = ctx.reader().terms(field);
       if (terms != null) {
         final TermsEnum termsEnum = terms.iterator();

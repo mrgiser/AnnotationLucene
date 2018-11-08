@@ -62,7 +62,9 @@ public class TermQuery extends Query {
       final CollectionStatistics collectionStats;
       final TermStatistics termStats;
       if (needsScores) {
+//        collectionStatistics函数用来统计某个域中的信息
         collectionStats = searcher.collectionStatistics(term.field());
+//        termStatistics函数用来统计某个词的信息
         termStats = searcher.termStatistics(term, termStates);
       } else {
         // we do not need the actual stats, use fake stats with docFreq=maxDoc and ttf=-1
@@ -70,7 +72,9 @@ public class TermQuery extends Query {
         collectionStats = new CollectionStatistics(term.field(), maxDoc, -1, -1, -1);
         termStats = new TermStatistics(term.bytes(), maxDoc, -1);
       }
-     
+
+//      最后通过这两个信息调用computeWeight函数计算权重
+//      similarity默认为BM25Similarity
       this.stats = similarity.computeWeight(collectionStats, termStats);
     }
 
@@ -86,6 +90,7 @@ public class TermQuery extends Query {
 
     @Override
     public float getValueForNormalization() {
+//      stats就是是BM25Stats，其getValueForNormalization函数最终返回idf值乘以boost后的平方
       return stats.getValueForNormalization();
     }
 
@@ -188,10 +193,14 @@ public class TermQuery extends Query {
 
   @Override
   public Weight createWeight(IndexSearcher searcher, boolean needsScores) throws IOException {
+//    getTopReaderContext返回CompositeReaderContext，封装了SegmentReader。
     final IndexReaderContext context = searcher.getTopReaderContext();
     final TermContext termState;
     if (perReaderTermState == null
         || perReaderTermState.wasBuiltFor(context) == false) {
+//      perReaderTermState默认为null，
+// 因此接下来通过TermContext的build函数进行匹配并获取对应的Term在索引表中的相应信息，
+// 最后根据得到的信息TermContext创建TermWeight并返回。
       if (needsScores) {
         // make TermQuery single-pass if we don't have a PRTS or if the context
         // differs!
