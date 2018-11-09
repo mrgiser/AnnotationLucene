@@ -259,6 +259,8 @@ public class TopDocs {
    *  is used to indicate that docs should be sorted by score. */
   private static TopDocs mergeAux(Sort sort, int start, int size, TopDocs[] shardHits, boolean setShardIndex) {
 
+//    mergeAux简单来说就是合并多个TopDocs为一个TopDocs并返回
+
     final PriorityQueue<ShardRef> queue;
     if (sort == null) {
       queue = new ScoreMergeSortQueue(shardHits);

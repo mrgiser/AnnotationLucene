@@ -127,6 +127,9 @@ public abstract class TopDocsCollector<T extends ScoreDoc> implements Collector 
    * search execution collected.
    */
   public TopDocs topDocs(int start, int howMany) {
+//    topDocsSize返回命中的文档数，pop函数删除队列中没有用的ScoreDoc，
+// populateResults函数复制最后剩下的ScoreDoc至results中，
+// 最后通过newTopDocs函数创建TopDocs封装ScoreDoc数组。
     
     // In case pq was populated with sentinel values, there might be less
     // results than pq.size(). Therefore return all results until either

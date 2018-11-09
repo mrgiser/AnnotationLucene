@@ -165,6 +165,7 @@ public abstract class Weight {
 
     // This impl always scores docs in order, so we can
     // ignore scoreDocsInOrder:
+//    将scorer函数返回的结果进一步封装成DefaultBulkScorer并返回
     return new DefaultBulkScorer(scorer);
   }
 
@@ -194,6 +195,8 @@ public abstract class Weight {
     public int score(LeafCollector collector, Bits acceptDocs, int min, int max) throws IOException {
       collector.setScorer(scorer);
       if (scorer.docID() == -1 && min == 0 && max == DocIdSetIterator.NO_MORE_DOCS) {
+//        默认情况下，需要对所有命中文档进行评分，因此这里往下看scoreAll函数，
+// 首先遍历iterator，然后依次调用ScorerLeafCollector的collect函数进行打分。
         scoreAll(collector, iterator, twoPhase, acceptDocs);
         return DocIdSetIterator.NO_MORE_DOCS;
       } else {

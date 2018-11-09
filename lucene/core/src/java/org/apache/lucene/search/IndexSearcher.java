@@ -447,6 +447,7 @@ public class IndexSearcher {
         return TopScoreDocCollector.create(cappedNumHits, after);
       }
 
+//      遍历collectors，依次取出SimpleTopScoreDoc并调用其topDocs函数取出前面的文档信息
       @Override
       public TopDocs reduce(Collection<TopScoreDocCollector> collectors) throws IOException {
         final TopDocs[] topDocs = new TopDocs[collectors.size()];
@@ -454,6 +455,7 @@ public class IndexSearcher {
         for (TopScoreDocCollector collector : collectors) {
           topDocs[i++] = collector.topDocs();
         }
+//        通过merge函数合并不同TopScoreDocCollector产生的TopDocs结果
         return TopDocs.merge(0, cappedNumHits, topDocs, true);
       }
 
@@ -693,6 +695,7 @@ public class IndexSearcher {
       BulkScorer scorer = weight.bulkScorer(ctx);
       if (scorer != null) {
         try {
+//          调用刚刚创建的DefaultBulkScorer的score函数
           scorer.score(leafCollector, ctx.reader().getLiveDocs());
         } catch (CollectionTerminatedException e) {
           // collection was terminated prematurely

@@ -106,8 +106,12 @@ public class TermQuery extends Query {
       if (termsEnum == null) {
         return null;
       }
+//      SegmentTermsEnum的postings函数，最终调用Lucene50PostingsReader的postings函数。
       PostingsEnum docs = termsEnum.postings(null, needsScores ? PostingsEnum.FREQS : PostingsEnum.NONE);
       assert docs != null;
+//      getNormsReader返回Lucene53NormsProducer，
+// Lucene53NormsProducer的getNorms函数根据域信息以及.nvd、.nvm文件读取信息创建NumericDocValues并返回。
+// simScorer最终创建BM25DocScorer并返回。
       return new TermScorer(this, docs, similarity.simScorer(stats, context));
     }
 

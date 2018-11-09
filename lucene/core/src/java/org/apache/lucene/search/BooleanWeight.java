@@ -398,6 +398,7 @@ final class BooleanWeight extends Weight {
       scorers.put(occur, new ArrayList<>());
     }
 
+//    BooleanWeight的scorer函数会循环调用每个子查询对应的Weight的scorer函数
     Iterator<BooleanClause> cIter = query.iterator();
     for (Weight w  : weights) {
       BooleanClause c =  cIter.next();

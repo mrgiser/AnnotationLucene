@@ -192,7 +192,9 @@ public final class Lucene50PostingsReader extends PostingsReaderBase {
     
   @Override
   public PostingsEnum postings(FieldInfo fieldInfo, BlockTermState termState, PostingsEnum reuse, int flags) throws IOException {
-    
+
+//    首先取出索引文件中的存储类型。
+// 假设进入第一个if语句，reuse参数默认为null，因此接下来创建一个BlockDocsEnum，并通过reset函数初始化。
     boolean indexHasPositions = fieldInfo.getIndexOptions().compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS) >= 0;
     boolean indexHasOffsets = fieldInfo.getIndexOptions().compareTo(IndexOptions.DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS) >= 0;
     boolean indexHasPayloads = fieldInfo.hasPayloads();
